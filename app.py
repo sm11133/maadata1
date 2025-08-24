@@ -3,6 +3,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from google.oauth2 import service_account
 import os
+import json
 
 st.title("📤 Google Drive Uploader (Streamlit Version)")
 
@@ -16,12 +17,14 @@ if uploaded_file is not None:
     with open(file_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    # Step 3: Authenticate and upload to Google Drive
+    # Step 3: Authenticate from Secrets and upload to Google Drive
     FOLDER_ID = "18Cl7QrKmELWFeHEDT00uE83GZsG96yqh"
-    SERVICE_ACCOUNT_FILE = "service_account.json"
 
-    credentials = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
+    service_json = st.secrets["SERVICE_ACCOUNT_JSON"]
+    service_dict = json.loads(service_json)
+
+    credentials = service_account.Credentials.from_service_account_info(
+        service_dict,
         scopes=["https://www.googleapis.com/auth/drive"]
     )
     drive_service = build("drive", "v3", credentials=credentials)
@@ -37,3 +40,4 @@ if uploaded_file is not None:
     # Cleanup and success message
     os.remove(file_path)
     st.success("✅ आपकी फ़ाइल Google Drive में सेव हो गई!")
+
